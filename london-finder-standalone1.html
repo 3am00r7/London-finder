@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What's On</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --navy: #1a2332;
+            --coral: #ff6b6b;
+            --blue: #4ecdc4;
+            --yellow: #ffe66d;
+            --cream: #f7f7f2;
+            --dark: #2d3436;
+            --grey: #636e72;
+            --light-grey: #dfe6e9;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 1rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem 1rem 1rem;
+        }
+
+        h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .tagline {
+            color: var(--grey);
+            font-size: 1rem;
+        }
+
+        .filters {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(26, 35, 50, 0.08);
+        }
+
+        .filter-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--navy);
+            margin-bottom: 0.75rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.25rem;
+            border: 2px solid var(--light-grey);
+            background: white;
+            border-radius: 24px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: var(--dark);
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--blue);
+            transform: translateY(-1px);
+        }
+
+        .filter-btn.active {
+            background: var(--navy);
+            color: white;
+            border-color: var(--navy);
+        }
+
+        .location-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--light-grey);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            transition: all 0.2s ease;
+            min-height: 52px;
+        }
+
+        .location-input:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+        }
+
+        .find-btn {
+            width: 100%;
+            padding: 1.25rem 2rem;
+            background: linear-gradient(135deg, var(--coral) 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+            min-height: 56px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .find-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .find-btn:disabled {
+            background: var(--grey);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .results-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        .regenerate-btn {
+            padding: 0.75rem 1.25rem;
+            background: white;
+            color: var(--navy);
+            border: 2px solid var(--navy);
+            border-radius: 24px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 44px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .regenerate-btn:hover {
+            background: var(--navy);
+            color: white;
+        }
+
+        .regenerate-btn:active {
+            transform: scale(0.98);
+        }
+
+        .cards {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(26, 35, 50, 0.08);
+            transition: all 0.3s ease;
+            animation: slideUp 0.4s ease;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+        .card:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(26, 35, 50, 0.12);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 0.25rem;
+            flex: 1;
+        }
+
+        .favorite-btn {
+            background: none;
+            border: none;
+            font-size: 1.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0.5rem;
+            line-height: 1;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .favorite-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .favorite-btn:active {
+            transform: scale(0.95);
+        }
+
+        .card-type {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--blue);
+            color: white;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-description {
+            color: var(--dark);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .card-details {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--light-grey);
+        }
+
+        .card-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--grey);
+            font-size: 0.875rem;
+        }
+
+        .card-detail-icon {
+            font-size: 1rem;
+        }
+
+        .favorites-section {
+            margin-top: 3rem;
+            display: none;
+        }
+
+        .favorites-section.show {
+            display: block;
+        }
+
+        .favorites-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .favorites-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        .clear-favorites-btn {
+            padding: 0.5rem 1rem;
+            background: none;
+            color: var(--coral);
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: underline;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .clear-favorites-btn:hover {
+            color: var(--navy);
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 0.75rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .filters {
+                padding: 1.25rem;
+            }
+
+            .filter-label {
+                font-size: 0.8125rem;
+            }
+
+            .button-group {
+                gap: 0.5rem;
+            }
+
+            .filter-btn {
+                font-size: 0.875rem;
+                padding: 0.625rem 1rem;
+            }
+
+            .card {
+                padding: 1.25rem;
+            }
+
+            .card-title {
+                font-size: 1.125rem;
+            }
+
+            .card-details {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .regenerate-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>What's On</h1>
+            <p class="tagline">Find something to do in London, right now</p>
+        </header>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label class="filter-label">Budget per person</label>
+                <div class="button-group">
+                    <button class="filter-btn" data-filter="budget" data-value="10">£10</button>
+                    <button class="filter-btn active" data-filter="budget" data-value="25">£25</button>
+                    <button class="filter-btn" data-filter="budget" data-value="50">£50+</button>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">When</label>
+                <div class="button-group">
+                    <button class="filter-btn active" data-filter="time" data-value="now">Right Now</button>
+                    <button class="filter-btn" data-filter="time" data-value="tonight">Tonight</button>
+                    <button class="filter-btn" data-filter="time" data-value="weekend">Weekend</button>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">What kind</label>
+                <div class="button-group">
+                    <button class="filter-btn" data-filter="category" data-value="food">Food & Drink</button>
+                    <button class="filter-btn" data-filter="category" data-value="activities">Activities</button>
+                    <button class="filter-btn" data-filter="category" data-value="nightlife">Nightlife</button>
+                    <button class="filter-btn active" data-filter="category" data-value="mix">Surprise Me</button>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Vibe</label>
+                <div class="button-group">
+                    <button class="filter-btn" data-filter="vibe" data-value="chill">Chill</button>
+                    <button class="filter-btn active" data-filter="vibe" data-value="energetic">Energetic</button>
+                    <button class="filter-btn" data-filter="vibe" data-value="sophisticated">Sophisticated</button>
+                    <button class="filter-btn" data-filter="vibe" data-value="casual">Casual</button>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Location</label>
+                <input type="text" class="location-input" id="locationInput" placeholder="e.g. Shoreditch, Camden, Soho">
+            </div>
+        </div>
+
+        <button class="find-btn" id="findBtn">Find Something To Do</button>
+
+        <div class="results" id="results">
+            <div class="results-header">
+                <h2 class="results-title">Here's what we found</h2>
+                <button class="regenerate-btn" id="regenerateBtn">🔄 More Options</button>
+            </div>
+            <div class="cards" id="cards"></div>
+        </div>
+
+        <div class="favorites-section" id="favoritesSection">
+            <div class="favorites-header">
+                <h2 class="favorites-title">Saved Favorites</h2>
+                <button class="clear-favorites-btn" id="clearFavoritesBtn">Clear All</button>
+            </div>
+            <div class="cards" id="favoritesCards"></div>
+        </div>
+    </div>
+
+    <script>
+        // Database of London spots
+        const database = [
+            // SHOREDITCH / EAST LONDON - Food & Drink
+            { name: "Dishoom Shoreditch", type: "food", category: "food", area: "Shoreditch", budget: 25, vibe: ["casual", "energetic"], time: ["now", "tonight"], why: "Bombay cafe with legendary bacon naan. Always buzzing, great for groups, book ahead or queue." },
+            { name: "Smoking Goat", type: "food", category: "food", area: "Shoreditch", budget: 25, vibe: ["casual", "energetic"], time: ["now", "tonight"], why: "Thai BBQ spot with fiery flavours. Loud, smoky, perfect for sharing plates with mates." },
+            { name: "The Culpeper", type: "drink", category: "food", area: "Shoreditch", budget: 25, vibe: ["chill", "casual"], time: ["now", "tonight"], why: "Rooftop pub with own garden, proper pints, decent food. Mellow afternoon or sunset vibes." },
+            { name: "Satan's Whiskers", type: "drink", category: "nightlife", area: "Bethnal Green", budget: 25, vibe: ["sophisticated", "chill"], time: ["tonight"], why: "Dark, intimate cocktail bar. No menus, just tell them what you like. Date spot energy." },
+            { name: "E Pellicci", type: "food", category: "food", area: "Bethnal Green", budget: 10, vibe: ["casual"], time: ["now"], why: "Old-school Italian caff since 1900. Full English, strong tea, proper East End institution." },
+            { name: "Pidgin", type: "food", category: "food", area: "Hackney", budget: 50, vibe: ["sophisticated"], time: ["tonight", "weekend"], why: "Weekly-changing tasting menu in a tiny space. Clever cooking, natural wines, intimate." },
+            
+            // SHOREDITCH - Activities
+            { name: "Columbia Road Flower Market", type: "activity", category: "activities", area: "Shoreditch", budget: 10, vibe: ["chill", "casual"], time: ["weekend"], why: "Sunday morning flower market, absolute London classic. Get there early, grab a bagel after." },
+            { name: "Brick Lane Market", type: "activity", category: "activities", area: "Shoreditch", budget: 10, vibe: ["casual", "energetic"], time: ["weekend"], why: "Vintage clothes, food stalls, street art. Chaotic in the best way, bring cash." },
+            { name: "Trampery", type: "activity", category: "activities", area: "Shoreditch", budget: 10, vibe: ["chill"], time: ["now", "weekend"], why: "Free workspace/cafe with community events. Chill spot to work or just hang between things." },
+            
+            // SOHO / CENTRAL - Food & Drink
+            { name: "Bao Soho", type: "food", category: "food", area: "Soho", budget: 25, vibe: ["casual", "energetic"], time: ["now", "tonight"], why: "Taiwanese steamed buns, always a queue, always worth it. Tiny spot, eat quick, move on." },
+            { name: "Bar Italia", type: "drink", category: "food", area: "Soho", budget: 10, vibe: ["casual"], time: ["now", "tonight"], why: "24hr Italian cafe, Soho institution. Strong espresso, people watching, post-pub scrambled eggs." },
+            { name: "Kiln", type: "food", category: "food", area: "Soho", budget: 25, vibe: ["casual", "energetic"], time: ["tonight"], why: "Thai clay pot cooking at a counter. Hot, loud, delicious. Walk-ins only, go early." },
+            { name: "French House", type: "drink", category: "nightlife", area: "Soho", budget: 25, vibe: ["sophisticated", "chill"], time: ["tonight"], why: "Legendary Soho boozer. Half pints only, literary crowd, proper pub feel." },
+            { name: "Swift", type: "drink", category: "nightlife", area: "Soho", budget: 25, vibe: ["sophisticated"], time: ["tonight"], why: "Two-floor cocktail bar. Upstairs is bright and Irish, downstairs is dark and serious." },
+            
+            // SOHO - Activities  
+            { name: "Chinatown Bakeries", type: "activity", category: "food", area: "Soho", budget: 10, vibe: ["casual"], time: ["now", "tonight"], why: "Wander Gerrard Street, grab egg tarts and pork buns. Cheap, cheerful, always open." },
+            { name: "Curzon Soho Cinema", type: "activity", category: "activities", area: "Soho", budget: 25, vibe: ["sophisticated", "chill"], time: ["tonight", "weekend"], why: "Arthouse cinema with a good bar. See something interesting, debate it after with a drink." },
+            
+            // CAMDEN - Food & Drink
+            { name: "Chin Chin Labs", type: "food", category: "food", area: "Camden", budget: 10, vibe: ["casual"], time: ["now", "weekend"], why: "Liquid nitrogen ice cream. Theatre and good flavours, perfect post-market treat." },
+            { name: "The Cheese Bar", type: "drink", category: "food", area: "Camden", budget: 25, vibe: ["casual", "chill"], time: ["now", "tonight"], why: "Wine bar with a serious cheese toastie menu. Cosy, relaxed, great for rainy days." },
+            { name: "Jazz Cafe", type: "drink", category: "nightlife", area: "Camden", budget: 25, vibe: ["energetic", "sophisticated"], time: ["tonight", "weekend"], why: "Live music venue with a bar upstairs. Check who's on, worth going for the right act." },
+            
+            // CAMDEN - Activities
+            { name: "Camden Market", type: "activity", category: "activities", area: "Camden", budget: 10, vibe: ["casual", "energetic"], time: ["now", "weekend"], why: "Massive sprawling market. Food stalls, vintage gear, tourist chaos. Embrace it." },
+            { name: "Regent's Canal Walk", type: "activity", category: "activities", area: "Camden", budget: 10, vibe: ["chill"], time: ["now", "weekend"], why: "Walk the towpath from Camden to King's Cross. Peaceful escape, good for hangovers." },
+            
+            // PECKHAM / SOUTH - Food & Drink
+            { name: "Mr Bao", type: "food", category: "food", area: "Peckham", budget: 10, vibe: ["casual"], time: ["now", "tonight"], why: "Taiwanese street food in a shipping container. Cheap, cheerful, perfect before drinks." },
+            { name: "Forza Wine", type: "drink", category: "food", area: "Peckham", budget: 25, vibe: ["chill", "casual"], time: ["now", "tonight"], why: "Natural wine bar with Italian small plates. Neighbourhood gem, always welcoming." },
+            { name: "Bussey Building", type: "drink", category: "nightlife", area: "Peckham", budget: 25, vibe: ["energetic", "casual"], time: ["tonight", "weekend"], why: "Multi-floor bar/club space. Rooftop in summer, gigs and parties, proper South London energy." },
+            { name: "Frank's Cafe", type: "drink", category: "food", area: "Peckham", budget: 25, vibe: ["chill", "casual"], time: ["now", "weekend"], why: "Rooftop bar on a car park. Summer only, incredible views, bring sunglasses and patience for the queue." },
+            
+            // PECKHAM - Activities
+            { name: "Peckham Levels", type: "activity", category: "activities", area: "Peckham", budget: 10, vibe: ["casual", "energetic"], time: ["now", "weekend"], why: "Multi-story car park turned creative hub. Food, drinks, shops, events. Good vibes." },
+            { name: "South London Gallery", type: "activity", category: "activities", area: "Peckham", budget: 10, vibe: ["chill", "sophisticated"], time: ["now", "weekend"], why: "Free contemporary art gallery with a great cafe. Quiet Sunday afternoon sorted." },
+            
+            // BRIXTON - Food & Drink
+            { name: "Salon", type: "food", category: "food", area: "Brixton", budget: 50, vibe: ["sophisticated"], time: ["tonight", "weekend"], why: "Market-driven European food above a pub. Rotating menu, great wine list, book ahead." },
+            { name: "Kricket Brixton", type: "food", category: "food", area: "Brixton", budget: 25, vibe: ["casual", "energetic"], time: ["now", "tonight"], why: "Modern Indian small plates. Shipping container setup, always packed, worth it." },
+            { name: "Brixton Village & Market Row", type: "food", category: "food", area: "Brixton", budget: 10, vibe: ["casual", "energetic"], time: ["now"], why: "Indoor market arcades packed with food stalls. Colombian, Caribbean, Thai, everything. Wander and pick." },
+            { name: "Lost in Brixton", type: "drink", category: "nightlife", area: "Brixton", budget: 25, vibe: ["energetic"], time: ["tonight", "weekend"], why: "Three-floor party spot with DJ sets and late license. Get messy." },
+            
+            // KING'S CROSS - Food & Drink
+            { name: "Dishoom King's Cross", type: "food", category: "food", area: "King's Cross", budget: 25, vibe: ["casual", "energetic"], time: ["now", "tonight"], why: "Another Dishoom, still excellent. Good for groups, coal drops yard location is lovely." },
+            { name: "Granary Square Fountains", type: "activity", category: "activities", area: "King's Cross", budget: 10, vibe: ["chill", "casual"], time: ["now", "weekend"], why: "Waterside square with fountains and steps. Grab takeaway, sit in the sun, watch the world." },
+            { name: "Spiritland", type: "drink", category: "food", area: "King's Cross", budget: 25, vibe: ["chill", "sophisticated"], time: ["now"], why: "All-day listening bar with incredible sound system. Coffee by day, cocktails by night, always great music." },
+            
+            // BOROUGH / SOUTHBANK - Food & Drink
+            { name: "Borough Market", type: "food", category: "food", area: "Borough", budget: 25, vibe: ["casual"], time: ["now", "weekend"], why: "London's best food market. Sample everything, buy cheese, eat raclette, drink coffee." },
+            { name: "Padella", type: "food", category: "food", area: "Borough", budget: 25, vibe: ["casual"], time: ["now", "tonight"], why: "Fresh pasta, massive queue, small menu, perfect execution. Go at odd hours." },
+            { name: "The Rake", type: "drink", category: "food", area: "Borough", budget: 25, vibe: ["chill", "casual"], time: ["now", "tonight"], why: "Tiny craft beer pub near Borough Market. Serious beer list, stand outside, good crowd." },
+            
+            // DALSTON - Food & Drink
+            { name: "Mangal 2", type: "food", category: "food", area: "Dalston", budget: 25, vibe: ["casual", "energetic"], time: ["tonight"], why: "Turkish ocakbasi grill. Sit at the counter, watch the chefs work, eat your body weight in lamb." },
+            { name: "Brilliant Corners", type: "drink", category: "nightlife", area: "Dalston", budget: 25, vibe: ["sophisticated", "chill"], time: ["tonight", "weekend"], why: "Jazz vinyl bar with Japanese food. Serious sound system, low lights, good for conversation." },
+            { name: "Dalston Roof Park", type: "drink", category: "food", area: "Dalston", budget: 25, vibe: ["chill", "casual"], time: ["now", "weekend"], why: "Rooftop bar and community garden. Summer only, BBQ vibes, surprisingly peaceful." },
+            { name: "The Alibi", type: "drink", category: "nightlife", area: "Dalston", budget: 25, vibe: ["energetic"], time: ["tonight", "weekend"], why: "Late-night cocktail bar in a railway arch. Dark, loud, fun. Good DJs on weekends." },
+            
+            // DALSTON - Activities
+            { name: "Ridley Road Market", type: "activity", category: "activities", area: "Dalston", budget: 10, vibe: ["casual", "energetic"], time: ["now", "weekend"], why: "Afro-Caribbean market, fruit and veg, cheap clothes, real London. Saturdays are best." },
+            
+            // HACKNEY WICK - Food & Drink
+            { name: "Crate Brewery", type: "drink", category: "food", area: "Hackney Wick", budget: 25, vibe: ["casual", "chill"], time: ["now", "weekend"], why: "Canalside brewery with pizzas. Sunny day essential, bring mates, hire a paddleboard after." },
+            { name: "Barge East", type: "food", category: "food", area: "Hackney Wick", budget: 50, vibe: ["sophisticated"], time: ["weekend"], why: "Restaurant on a barge. Seasonal menu, lovely in summer, book for sunset." },
+            { name: "Howling Hops", type: "drink", category: "food", area: "Hackney Wick", budget: 25, vibe: ["casual", "energetic"], time: ["now", "tonight"], why: "Tank beer bar in a warehouse. Fresh brews, big space, unpretentious vibe." },
+            
+            // CENTRAL - Activities
+            { name: "Tate Modern", type: "activity", category: "activities", area: "Southbank", budget: 10, vibe: ["sophisticated", "chill"], time: ["now", "weekend"], why: "Free modern art, huge building, great for a wander. Top floor cafe has views." },
+            { name: "Barbican Conservatory", type: "activity", category: "activities", area: "Barbican", budget: 10, vibe: ["chill"], time: ["weekend"], why: "Tropical greenhouse in the Brutalist Barbican. Sunday opening only, peaceful escape." },
+            { name: "Hyde Park Lido", type: "activity", category: "activities", area: "Hyde Park", budget: 10, vibe: ["chill", "casual"], time: ["now", "weekend"], why: "Outdoor swimming in the Serpentine. Summer essential, brave the cold water, feel alive." },
+            { name: "Hampstead Heath", type: "activity", category: "activities", area: "Hampstead", budget: 10, vibe: ["chill"], time: ["now", "weekend"], why: "Massive park with proper hills and views. Swimming ponds if you're brave. Get lost for hours." },
+            
+            // NIGHTLIFE
+            { name: "XOYO", type: "nightlife", category: "nightlife", area: "Shoreditch", budget: 25, vibe: ["energetic"], time: ["tonight", "weekend"], why: "Shoreditch club with rotating residents. Two floors, decent sound, mix of house and techno." },
+            { name: "Fabric", type: "nightlife", category: "nightlife", area: "Farringdon", budget: 25, vibe: ["energetic"], time: ["weekend"], why: "Legendary warehouse club. Three rooms, world-class bookings, stay till breakfast." },
+            { name: "The Ned", type: "drink", category: "nightlife", area: "Bank", budget: 50, vibe: ["sophisticated"], time: ["tonight"], why: "Grand banking hall turned members club (ground floor is public). Dress smart, drink martinis, pretend you're rich." },
+            { name: "Sketch", type: "drink", category: "nightlife", area: "Mayfair", budget: 50, vibe: ["sophisticated"], time: ["tonight", "weekend"], why: "Pink room, egg toilets, expensive cocktails. Peak Instagram but genuinely fun. Do it once." },
+            { name: "Notting Hill Arts Club", type: "nightlife", category: "nightlife", area: "Notting Hill", budget: 25, vibe: ["energetic", "casual"], time: ["tonight", "weekend"], why: "Basement club with eclectic nights. Funk, soul, disco, good crowd, no pretension." },
+            { name: "Village Underground", type: "nightlife", category: "nightlife", area: "Shoreditch", budget: 25, vibe: ["energetic"], time: ["tonight", "weekend"], why: "Live music and club nights in railway arches. Check the lineup, gets sweaty." },
+            
+            // MISC GOOD SPOTS
+            { name: "Gordon's Wine Bar", type: "drink", category: "food", area: "Embankment", budget: 25, vibe: ["chill", "sophisticated"], time: ["now", "tonight"], why: "London's oldest wine bar. Candlelit cellar, cheap wine, cheese boards. Atmospheric as hell." },
+            { name: "St. John", type: "food", category: "food", area: "Farringdon", budget: 50, vibe: ["sophisticated"], time: ["tonight", "weekend"], why: "Nose-to-tail British cooking. Bone marrow on toast, roast everything, proper restaurant experience." },
+            { name: "Berber & Q", type: "food", category: "food", area: "Haggerston", budget: 25, vibe: ["casual", "energetic"], time: ["tonight"], why: "Middle Eastern BBQ. Smoky meats, loud music, sharing plates. Book ahead." },
+            { name: "Petersham Nurseries", type: "food", category: "food", area: "Covent Garden", budget: 50, vibe: ["sophisticated", "chill"], time: ["weekend"], why: "Greenhouse restaurant with plants everywhere. Lovely for special occasions or treating yourself." },
+            { name: "Lyle's", type: "food", category: "food", area: "Shoreditch", budget: 50, vibe: ["sophisticated"], time: ["weekend"], why: "Michelin-starred but unfussy. Seasonal British, simple plates, excellent wine. Lunch is better value." },
+            { name: "Primeur", type: "food", category: "food", area: "Stoke Newington", budget: 25, vibe: ["sophisticated", "chill"], time: ["tonight", "weekend"], why: "Wine bar with rotating small plates. Counter seating, natural wines, neighbourhood feel." },
+            { name: "Broadway Market", type: "activity", category: "activities", area: "Hackney", budget: 10, vibe: ["casual"], time: ["weekend"], why: "Saturday market with food, crafts, vintage. Good coffee shops and pubs around too." },
+            
+            // MORE BUDGET OPTIONS
+            { name: "Greggs", type: "food", category: "food", area: "Everywhere", budget: 10, vibe: ["casual"], time: ["now"], why: "National treasure. Sausage roll, steak bake, cheap lunch sorted. No shame." },
+            { name: "Pret A Manger", type: "food", category: "food", area: "Central", budget: 10, vibe: ["casual"], time: ["now"], why: "Quick lunch, decent coffee, free wifi. Nothing exciting but reliably fine." },
+            { name: "Spoons", type: "drink", category: "nightlife", area: "Everywhere", budget: 10, vibe: ["casual"], time: ["now", "tonight"], why: "Cheap pints, full English for under £5. Peak Britain." },
+            { name: "Five Guys", type: "food", category: "food", area: "Various", budget: 25, vibe: ["casual"], time: ["now", "tonight"], why: "American burgers, unlimited toppings, free peanuts. Greasy and great." },
+            { name: "Nando's", type: "food", category: "food", area: "Various", budget: 25, vibe: ["casual", "energetic"], time: ["now", "tonight"], why: "Peri-peri chicken, everyone knows what they're getting. Solid group choice." },
+            { name: "Wagamama", type: "food", category: "food", area: "Various", budget: 25, vibe: ["casual"], time: ["now", "tonight"], why: "Asian food, big portions, shared tables. Quick and filling." },
+            
+            // MORE CHILL OPTIONS
+            { name: "Primrose Hill", type: "activity", category: "activities", area: "Primrose Hill", budget: 10, vibe: ["chill"], time: ["now", "weekend"], why: "Best free view in London. Bring snacks, watch the sunset, perfect date spot." },
+            { name: "Greenwich Park", type: "activity", category: "activities", area: "Greenwich", budget: 10, vibe: ["chill"], time: ["now", "weekend"], why: "Massive park with observatory and views over the Thames. Proper day out." },
+            { name: "Kyoto Garden", type: "activity", category: "activities", area: "Holland Park", budget: 10, vibe: ["chill", "sophisticated"], time: ["now", "weekend"], why: "Japanese garden in West London. Peaceful, pretty, free. Good for clearing your head." },
+            { name: "Southbank Walk", type: "activity", category: "activities", area: "Southbank", budget: 10, vibe: ["chill", "casual"], time: ["now", "weekend"], why: "Walk from Westminster to Tower Bridge. Street performers, book stalls, Thames views." },
+            
+            // MORE ENERGETIC OPTIONS  
+            { name: "Bounce", type: "activity", category: "activities", area: "Various", budget: 25, vibe: ["energetic", "casual"], time: ["now", "tonight", "weekend"], why: "Ping pong bar. Competitive or casual, good drinks, always fun with mates." },
+            { name: "Flight Club", type: "activity", category: "activities", area: "Shoreditch", budget: 25, vibe: ["energetic", "casual"], time: ["now", "tonight", "weekend"], why: "Social darts with electronic scoring. Book a board, order pizza, get competitive." },
+            { name: "Clissold Park", type: "activity", category: "activities", area: "Stoke Newington", budget: 10, vibe: ["chill", "casual"], time: ["now", "weekend"], why: "Nice park with deer, cafe, good for a wander. Less touristy than the big ones." },
+            { name: "All Star Lanes", type: "activity", category: "activities", area: "Various", budget: 25, vibe: ["energetic", "casual"], time: ["now", "tonight", "weekend"], why: "Retro bowling with good burgers. Book a lane, drink cocktails, knock down pins." },
+            
+            // MORE SOPHISTICATED OPTIONS
+            { name: "Rochelle Canteen", type: "food", category: "food", area: "Shoreditch", budget: 50, vibe: ["sophisticated", "chill"], time: ["now", "weekend"], why: "Hidden in a bike yard. Simple British food, excellent ingredients, relaxed vibe." },
+            { name: "Noble Rot", type: "drink", category: "food", area: "Bloomsbury", budget: 50, vibe: ["sophisticated"], time: ["tonight", "weekend"], why: "Wine bar with restaurant upstairs. Incredible list, knowledgeable staff, book for food." },
+            { name: "Claridge's Bar", type: "drink", category: "nightlife", area: "Mayfair", budget: 50, vibe: ["sophisticated"], time: ["tonight"], why: "Art deco glamour, perfect martinis, live piano. Dress smart, feel fancy." },
+            { name: "American Bar at The Savoy", type: "drink", category: "nightlife", area: "Strand", budget: 50, vibe: ["sophisticated"], time: ["tonight"], why: "World's best bar multiple times. Historic, expensive, worth it once." },
+            
+            // MORE NIGHTLIFE
+            { name: "Printworks", type: "nightlife", category: "nightlife", area: "Surrey Quays", budget: 25, vibe: ["energetic"], time: ["weekend"], why: "Massive warehouse venue. Big name DJs, all-day parties, serious sound system." },
+            { name: "Ministry of Sound", type: "nightlife", category: "nightlife", area: "Elephant & Castle", budget: 25, vibe: ["energetic"], time: ["weekend"], why: "Legendary club, still going strong. House and techno, multiple rooms, stay late." },
+            { name: "The Box", type: "nightlife", category: "nightlife", area: "Soho", budget: 50, vibe: ["sophisticated", "energetic"], time: ["tonight", "weekend"], why: "Cabaret club. Outrageous performances, dress up, expect the unexpected." },
+            { name: "Egg London", type: "nightlife", category: "nightlife", area: "King's Cross", budget: 25, vibe: ["energetic"], time: ["weekend"], why: "Three rooms including outdoor terrace. Techno focused, good for dancing till morning." },
+            
+            // CASUAL WEEKEND SPOTS
+            { name: "Portobello Road Market", type: "activity", category: "activities", area: "Notting Hill", budget: 10, vibe: ["casual"], time: ["weekend"], why: "Saturday antiques market, touristy but still fun. Good for browsing and people watching." },
+            { name: "God's Own Junkyard", type: "activity", category: "activities", area: "Walthamstow", budget: 10, vibe: ["energetic", "casual"], time: ["weekend"], why: "Neon sign graveyard. Instagram heaven, surprisingly cool, worth the trek East." },
+            { name: "Maltby Street Market", type: "food", category: "food", area: "Bermondsey", budget: 25, vibe: ["casual"], time: ["weekend"], why: "Weekend food market under railway arches. Less crowded than Borough, great quality." },
+            { name: "Battersea Power Station", type: "activity", category: "activities", area: "Battersea", budget: 25, vibe: ["casual", "sophisticated"], time: ["now", "weekend"], why: "Redeveloped icon with shops, restaurants, rooftop. Good for an afternoon wander." },
+            
+            // MORE FOOD & DRINK - VARIOUS AREAS
+            { name: "Hoppers", type: "food", category: "food", area: "Soho", budget: 25, vibe: ["casual", "energetic"], time: ["now", "tonight"], why: "Sri Lankan hoppers and kothu. Small, loud, amazing flavours. Queue or book." },
+            { name: "Flat Iron", type: "food", category: "food", area: "Covent Garden", budget: 25, vibe: ["casual"], time: ["now", "tonight"], why: "£12 steak, simple menu, consistently good. Multiple locations, walk-ins welcome." },
+            { name: "Honest Burgers", type: "food", category: "food", area: "Various", budget: 25, vibe: ["casual"], time: ["now", "tonight"], why: "Proper burgers, rosemary chips, craft beer. Better than the chains, worth the slight premium." },
+            { name: "Pizza Pilgrims", type: "food", category: "food", area: "Various", budget: 25, vibe: ["casual", "energetic"], time: ["now", "tonight"], why: "Neapolitan pizza, quick service, good vibes. Reliably solid across all locations." },
+            { name: "Tayyabs", type: "food", category: "food", area: "Whitechapel", budget: 25, vibe: ["casual", "energetic"], time: ["tonight"], why: "Legendary Pakistani grill. BYOB, massive portions, always packed. Prepare to queue." },
+            { name: "Roti King", type: "food", category: "food", area: "Euston", budget: 10, vibe: ["casual"], time: ["now"], why: "Malaysian canai and curries. Tiny spot, huge flavours, cheap as chips. Lunch queue is real." },
+            { name: "Beigel Bake", type: "food", category: "food", area: "Brick Lane", budget: 10, vibe: ["casual"], time: ["now", "tonight"], why: "24hr bagel shop. Salt beef beigel at 3am is a London rite of passage." },
+            { name: "Circolo Popolare", type: "food", category: "food", area: "Fitzrovia", budget: 25, vibe: ["energetic", "casual"], time: ["tonight"], why: "Big Box group Italian. Over the top decor, sharing plates, party atmosphere." },
+            { name: "Barrafina", type: "food", category: "food", area: "Soho", budget: 50, vibe: ["sophisticated"], time: ["tonight"], why: "Counter-dining Spanish tapas. Watch the chefs work, order everything. No bookings." },
+            { name: "Xu", type: "food", category: "food", area: "Soho", budget: 50, vibe: ["sophisticated"], time: ["tonight"], why: "Taiwanese basement restaurant. Dark, sexy atmosphere, excellent cocktails. Date night energy." },
+            
+            // MORE DRINKS & BARS
+            { name: "The Mayflower", type: "drink", category: "food", area: "Rotherhithe", budget: 25, vibe: ["chill"], time: ["now", "weekend"], why: "Riverside pub with jetty seating. Hidden gem, proper pub lunch, peaceful Thames views." },
+            { name: "The Prospect of Whitby", type: "drink", category: "food", area: "Wapping", budget: 25, vibe: ["chill", "sophisticated"], time: ["now", "tonight"], why: "500+ year old riverside pub. Nautical history, cozy fires, tourist-heavy but charming." },
+            { name: "Trailer Happiness", type: "drink", category: "nightlife", area: "Notting Hill", budget: 25, vibe: ["energetic", "casual"], time: ["tonight"], why: "Rum bar with tiki vibes. Small, dark, strong cocktails. Get the zombie, regret nothing." },
+            { name: "Nightjar", type: "drink", category: "nightlife", area: "Shoreditch", budget: 50, vibe: ["sophisticated"], time: ["tonight"], why: "Speakeasy cocktail bar with live jazz. Vintage glamour, impeccable drinks, book ahead." },
+            { name: "Happiness Forgets", type: "drink", category: "nightlife", area: "Hoxton", budget: 25, vibe: ["chill", "sophisticated"], time: ["tonight"], why: "Basement cocktail bar. No standing, limited seats, serious drinks. Arrive early." },
+            { name: "The Blind Pig", type: "drink", category: "nightlife", area: "Soho", budget: 25, vibe: ["sophisticated"], time: ["tonight"], why: "Hidden bar above Social Eating House. Cocktails and small bites, speakeasy vibes." },
+            { name: "Callooh Callay", type: "drink", category: "nightlife", area: "Shoreditch", budget: 25, vibe: ["energetic", "sophisticated"], time: ["tonight"], why: "Multi-room cocktail bar. Secret door through a wardrobe, fun but well-executed." },
+            { name: "69 Colebrooke Row", type: "drink", category: "nightlife", area: "Islington", budget: 25, vibe: ["sophisticated", "chill"], time: ["tonight"], why: "Tiny cocktail bar by a legend. No sign, no menu, just tell them what you like." },
+            
+            // MORE ACTIVITIES & CULTURE
+            { name: "Natural History Museum", type: "activity", category: "activities", area: "South Kensington", budget: 10, vibe: ["chill", "sophisticated"], time: ["now", "weekend"], why: "Free, dinosaurs, beautiful building. Classic London, never gets old." },
+            { name: "V&A Museum", type: "activity", category: "activities", area: "South Kensington", budget: 10, vibe: ["chill", "sophisticated"], time: ["now", "weekend"], why: "Free design museum. Incredible collection, Friday late nights with DJs sometimes." },
+            { name: "British Museum", type: "activity", category: "activities", area: "Bloomsbury", budget: 10, vibe: ["chill", "sophisticated"], time: ["now", "weekend"], why: "World history, free entry. Easy to spend hours, great court cafe." },
+            { name: "Sky Garden", type: "activity", category: "activities", area: "City", budget: 10, vibe: ["sophisticated"], time: ["now", "weekend"], why: "Free rooftop garden with city views. Book ahead, have a drink at the bar." },
+            { name: "Dennis Severs' House", type: "activity", category: "activities", area: "Spitalfields", budget: 25, vibe: ["sophisticated", "chill"], time: ["weekend"], why: "Time capsule 18th century house. Silent visits, incredibly atmospheric. Unique London experience." },
+            { name: "Little Venice", type: "activity", category: "activities", area: "Paddington", budget: 10, vibe: ["chill"], time: ["now", "weekend"], why: "Canal walk with houseboats and cafes. Peaceful escape, good for aimless wandering." },
+            { name: "Leake Street Arches", type: "activity", category: "activities", area: "Waterloo", budget: 10, vibe: ["casual", "energetic"], time: ["now", "weekend"], why: "Legal graffiti tunnel under Waterloo. Constantly changing street art, good photo spot." },
+            { name: "Camden Passage", type: "activity", category: "activities", area: "Islington", budget: 10, vibe: ["chill", "casual"], time: ["weekend"], why: "Antiques market on Wednesdays and Saturdays. Cafes, independent shops, less chaotic than Camden." },
+            { name: "Wimbledon Common", type: "activity", category: "activities", area: "Wimbledon", budget: 10, vibe: ["chill"], time: ["now", "weekend"], why: "Massive common with woodland. Good for long walks, feels properly countryside." },
+            { name: "Olympic Park", type: "activity", category: "activities", area: "Stratford", budget: 10, vibe: ["chill", "casual"], time: ["now", "weekend"], why: "Post-2012 park, good for cycling or walking. Weird sculptures, big spaces." },
+            
+            // MORE NIGHTLIFE & LATE SPOTS
+            { name: "KOKO", type: "nightlife", category: "nightlife", area: "Camden", budget: 25, vibe: ["energetic"], time: ["tonight", "weekend"], why: "Historic venue with club nights and gigs. Recently refurbed, great sound." },
+            { name: "The Blues Kitchen", type: "nightlife", category: "nightlife", area: "Camden", budget: 25, vibe: ["energetic", "casual"], time: ["tonight", "weekend"], why: "Live blues, soul food, bourbon. Party atmosphere, late license." },
+            { name: "Phonox", type: "nightlife", category: "nightlife", area: "Brixton", budget: 25, vibe: ["energetic"], time: ["tonight", "weekend"], why: "Intimate club with serious DJs. House and techno, good crowd, stays open late." },
+            { name: "Corsica Studios", type: "nightlife", category: "nightlife", area: "Elephant & Castle", budget: 25, vibe: ["energetic"], time: ["weekend"], why: "Railway arch venue. Techno, grime, experimental. Proper underground vibes." },
+            { name: "Oslo", type: "nightlife", category: "nightlife", area: "Hackney", budget: 25, vibe: ["energetic", "casual"], time: ["tonight", "weekend"], why: "Venue/bar with club nights. Good mix of indie and electronic, young crowd." },
+            { name: "Tobacco Dock", type: "nightlife", category: "nightlife", area: "Wapping", budget: 25, vibe: ["energetic"], time: ["weekend"], why: "Warehouse event space. Big raves and festivals, check what's on." },
+            
+            // MORE WEST LONDON
+            { name: "The Ledbury", type: "food", category: "food", area: "Notting Hill", budget: 50, vibe: ["sophisticated"], time: ["weekend"], why: "Two Michelin stars. Special occasion, incredible food, book months ahead." },
+            { name: "Electric Diner", type: "food", category: "food", area: "Notting Hill", budget: 25, vibe: ["casual", "chill"], time: ["now", "tonight"], why: "All-day American diner. Booths, cocktails, burgers. Good hangover spot." },
+            { name: "Beach Blanket Babylon", type: "drink", category: "nightlife", area: "Notting Hill", budget: 25, vibe: ["sophisticated", "energetic"], time: ["tonight"], why: "Gothic baroque decor, cocktails, late license. Over the top and fun." },
+            
+            // MORE NORTH LONDON
+            { name: "La Fromagerie", type: "food", category: "food", area: "Marylebone", budget: 25, vibe: ["sophisticated", "chill"], time: ["now"], why: "Cheese shop with cafe. Perfect lunch, wine pairings, lovely for cheese lovers." },
+            { name: "The Drapers Arms", type: "drink", category: "food", area: "Islington", budget: 25, vibe: ["chill", "casual"], time: ["now", "tonight", "weekend"], why: "Gastropub with garden. Sunday roasts, good beer, neighbourhood feel." },
+            { name: "The Spaniards Inn", type: "drink", category: "food", area: "Hampstead", budget: 25, vibe: ["chill", "sophisticated"], time: ["now", "weekend"], why: "Historic pub by the heath. Beer garden, roaring fires, escape the city." },
+            
+            // MORE CHEAP EATS
+            { name: "Brick Lane Bagels (24hr)", type: "food", category: "food", area: "Shoreditch", budget: 10, vibe: ["casual"], time: ["now", "tonight"], why: "Salt beef bagels any time. Essential post-night-out." },
+            { name: "Pieminister", type: "food", category: "food", area: "Various", budget: 10, vibe: ["casual"], time: ["now", "tonight"], why: "Proper pies with mash. Comfort food, multiple locations, does the job." },
+            { name: "Leon", type: "food", category: "food", area: "Various", budget: 10, vibe: ["casual"], time: ["now"], why: "Mediterranean fast food. Healthier chain option, decent coffee." },
+            { name: "Chipotle", type: "food", category: "food", area: "Various", budget: 10, vibe: ["casual"], time: ["now", "tonight"], why: "Build your own burrito. Quick, filling, reliable." },
+        ];
+
+        // State management
+        const state = {
+            budget: '25',
+            time: 'now',
+            category: 'mix',
+            vibe: 'energetic',
+            location: '',
+            lastResults: []
+        };
+
+        // DOM elements
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const locationInput = document.getElementById('locationInput');
+        const findBtn = document.getElementById('findBtn');
+        const results = document.getElementById('results');
+        const cards = document.getElementById('cards');
+        const regenerateBtn = document.getElementById('regenerateBtn');
+        const favoritesSection = document.getElementById('favoritesSection');
+        const favoritesCards = document.getElementById('favoritesCards');
+        const clearFavoritesBtn = document.getElementById('clearFavoritesBtn');
+
+        // Filter button handlers
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const filter = btn.dataset.filter;
+                const value = btn.dataset.value;
+
+                document.querySelectorAll(`[data-filter="${filter}"]`).forEach(b => {
+                    b.classList.remove('active');
+                });
+                btn.classList.add('active');
+
+                state[filter] = value;
+            });
+        });
+
+        // Location input
+        locationInput.addEventListener('input', (e) => {
+            state.location = e.target.value;
+        });
+
+        // Find button
+        findBtn.addEventListener('click', findSuggestions);
+        regenerateBtn.addEventListener('click', findSuggestions);
+
+        // Favorites handlers
+        clearFavoritesBtn.addEventListener('click', () => {
+            if (confirm('Clear all saved favorites?')) {
+                localStorage.removeItem('londonFavorites');
+                renderFavorites();
+            }
+        });
+
+        function findSuggestions() {
+            // Filter database based on criteria - more lenient approach
+            let filtered = database.filter(place => {
+                // Budget filter - overlapping ranges for flexibility
+                if (state.budget === '10' && place.budget > 20) return false;
+                if (state.budget === '25' && place.budget > 40) return false;
+                // £50+ shows everything above £25
+                if (state.budget === '50' && place.budget < 25) return false;
+
+                // Category filter
+                if (state.category !== 'mix' && place.category !== state.category) return false;
+
+                // Vibe filter - any matching vibe is good
+                if (!place.vibe.includes(state.vibe)) return false;
+
+                // Time filter - any matching time is good
+                if (!place.time.includes(state.time)) return false;
+
+                return true;
+            });
+
+            // Location-based prioritization (fuzzy matching)
+            if (state.location) {
+                const locationLower = state.location.toLowerCase();
+                filtered.sort((a, b) => {
+                    const aAreaLower = a.area.toLowerCase();
+                    const bAreaLower = b.area.toLowerCase();
+                    
+                    // Exact match gets highest priority
+                    const aExact = aAreaLower === locationLower ? 2 : 0;
+                    const bExact = bAreaLower === locationLower ? 2 : 0;
+                    
+                    // Contains match gets medium priority
+                    const aContains = aAreaLower.includes(locationLower) || locationLower.includes(aAreaLower) ? 1 : 0;
+                    const bContains = bAreaLower.includes(locationLower) || locationLower.includes(bAreaLower) ? 1 : 0;
+                    
+                    return (bExact + bContains) - (aExact + aContains);
+                });
+            }
+
+            // Remove previously shown results for regenerate
+            if (state.lastResults.length > 0) {
+                const notShown = filtered.filter(place => 
+                    !state.lastResults.some(last => last.name === place.name)
+                );
+                
+                // If we have enough new options, use them
+                if (notShown.length >= 3) {
+                    filtered = notShown;
+                } else {
+                    // Otherwise reset history and show everything
+                    state.lastResults = [];
+                }
+            }
+
+            // If we filtered everything out, show a message
+            if (filtered.length === 0) {
+                cards.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--grey);">
+                        <p style="font-size: 1.125rem; margin-bottom: 0.5rem;">No matches found</p>
+                        <p style="font-size: 0.875rem;">Try adjusting your filters or location</p>
+                    </div>
+                `;
+                results.classList.add('show');
+                return;
+            }
+
+            // Randomly select 5 (or fewer if not enough options)
+            const selected = [];
+            const count = Math.min(5, filtered.length);
+            
+            while (selected.length < count && filtered.length > 0) {
+                const randomIndex = Math.floor(Math.random() * filtered.length);
+                selected.push(filtered[randomIndex]);
+                filtered.splice(randomIndex, 1);
+            }
+
+            state.lastResults = selected;
+            displaySuggestions(selected);
+        }
+
+        function displaySuggestions(suggestions) {
+            cards.innerHTML = '';
+            
+            suggestions.forEach((suggestion, index) => {
+                const card = createCard(suggestion, index);
+                cards.appendChild(card);
+            });
+
+            results.classList.add('show');
+        }
+
+        function createCard(suggestion, index) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            const isFavorite = checkIfFavorite(suggestion.name);
+            
+            // Map types to display names
+            const typeDisplay = {
+                'food': 'Food',
+                'drink': 'Drink',
+                'activity': 'Activity',
+                'nightlife': 'Nightlife'
+            };
+
+            // Cost display
+            let costDisplay = '';
+            if (suggestion.budget <= 15) costDisplay = '£10-15';
+            else if (suggestion.budget <= 35) costDisplay = '£20-35';
+            else costDisplay = '£40+';
+            
+            card.innerHTML = `
+                <div class="card-header">
+                    <div>
+                        <h3 class="card-title">${suggestion.name}</h3>
+                        <span class="card-type">${typeDisplay[suggestion.type]}</span>
+                    </div>
+                    <button class="favorite-btn" data-name="${suggestion.name}">
+                        ${isFavorite ? '❤️' : '🤍'}
+                    </button>
+                </div>
+                <p class="card-description">${suggestion.why}</p>
+                <div class="card-details">
+                    <div class="card-detail">
+                        <span class="card-detail-icon">💷</span>
+                        <span>${costDisplay} pp</span>
+                    </div>
+                    <div class="card-detail">
+                        <span class="card-detail-icon">📍</span>
+                        <span>${suggestion.area}</span>
+                    </div>
+                </div>
+            `;
+
+            const favoriteBtn = card.querySelector('.favorite-btn');
+            favoriteBtn.addEventListener('click', () => toggleFavorite(suggestion));
+
+            return card;
+        }
+
+        function toggleFavorite(suggestion) {
+            let favorites = JSON.parse(localStorage.getItem('londonFavorites') || '[]');
+            
+            const existingIndex = favorites.findIndex(f => f.name === suggestion.name);
+            
+            if (existingIndex >= 0) {
+                favorites.splice(existingIndex, 1);
+            } else {
+                favorites.push(suggestion);
+            }
+            
+            localStorage.setItem('londonFavorites', JSON.stringify(favorites));
+            
+            // Update all buttons with this name
+            document.querySelectorAll(`[data-name="${suggestion.name}"]`).forEach(btn => {
+                btn.textContent = existingIndex >= 0 ? '🤍' : '❤️';
+            });
+            
+            renderFavorites();
+        }
+
+        function checkIfFavorite(name) {
+            const favorites = JSON.parse(localStorage.getItem('londonFavorites') || '[]');
+            return favorites.some(f => f.name === name);
+        }
+
+        function renderFavorites() {
+            const favorites = JSON.parse(localStorage.getItem('londonFavorites') || '[]');
+            
+            if (favorites.length === 0) {
+                favoritesSection.classList.remove('show');
+                return;
+            }
+
+            favoritesCards.innerHTML = '';
+            favorites.forEach((fav, index) => {
+                const card = createCard(fav, `fav-${index}`);
+                favoritesCards.appendChild(card);
+            });
+
+            favoritesSection.classList.add('show');
+        }
+
+        // Load favorites on page load
+        renderFavorites();
+    </script>
+</body>
+</html>
